@@ -11,4 +11,5 @@ export class GetProductsUseCase {
   async execute() {
     return this.repository.findAll();
   }
+
 }

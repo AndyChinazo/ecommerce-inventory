@@ -1,4 +1,16 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { GetProductsUseCase } from '../../application/usecases/get-products.usecase';
 
-@Controller('product')
-export class ProductController {}
+@Controller('products')
+export class ProductController {
+
+  constructor(
+    private readonly getProductsUseCase: GetProductsUseCase,
+  ) {}
+
+  @Get()
+  async findAll() {
+    return this.getProductsUseCase.execute();
+  }
+
+}
