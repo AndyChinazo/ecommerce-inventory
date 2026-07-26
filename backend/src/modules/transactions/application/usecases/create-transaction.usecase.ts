@@ -4,7 +4,7 @@ import { CreateTransactionDto } from '../dto/create-transaction.dto';
 
 import { PrismaProductRepository } from '../../../products/infrastructure/repositories/prisma-product.repository';
 import { PrismaCustomerRepository } from '../../../customers/infrastructure/repositories/prisma-customer.repository';
-
+import { PrismaTransactionRepository } from '../../infrastructure/repositories/prisma-transaction.repository';
 
 @Injectable()
 export class CreateTransactionUseCase {
@@ -12,6 +12,7 @@ export class CreateTransactionUseCase {
   constructor(
     private readonly productRepository: PrismaProductRepository,
     private readonly customerRepository: PrismaCustomerRepository,
+    private readonly transactionRepository: PrismaTransactionRepository,
   ) { }
 
   async execute(dto: CreateTransactionDto) {
@@ -29,7 +30,6 @@ export class CreateTransactionUseCase {
     let customer = await this.customerRepository.findByEmail(dto.email);
 
     if (!customer) {
-
       customer = await this.customerRepository.create({
         id: '',
         fullName: dto.fullName,
@@ -40,14 +40,34 @@ export class CreateTransactionUseCase {
         department: dto.department,
         createdAt: new Date(),
       });
-
     }
 
-    return {
-      message: 'Validación completada.',
-      product,
-      customer,
-    };
+    const transactionNumber = `TX-${Date.now()}`;
+
+    const subtotal = product.price;
+
+    const baseFee = 5000;
+
+    const deliveryFee = 12000;
+
+    const total = subtotal + baseFee + deliveryFee;
+
+    const transaction = await this.transactionRepository.create({
+      id: '',
+      transactionNumber,
+      wompiTransactionId: undefined,
+      status: 'PENDING',
+      subtotal,
+      baseFee,
+      deliveryFee,
+      total,
+      customerId: customer.id,
+      productId: product.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    return transaction;
 
   }
 
