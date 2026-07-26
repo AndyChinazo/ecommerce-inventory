@@ -3,13 +3,16 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { CreateTransactionDto } from '../dto/create-transaction.dto';
 
 import { PrismaProductRepository } from '../../../products/infrastructure/repositories/prisma-product.repository';
+import { PrismaCustomerRepository } from '../../../customers/infrastructure/repositories/prisma-customer.repository';
+
 
 @Injectable()
 export class CreateTransactionUseCase {
 
   constructor(
     private readonly productRepository: PrismaProductRepository,
-  ) {}
+    private readonly customerRepository: PrismaCustomerRepository,
+  ) { }
 
   async execute(dto: CreateTransactionDto) {
 
@@ -23,11 +26,27 @@ export class CreateTransactionUseCase {
       throw new BadRequestException('Producto sin stock');
     }
 
-    console.log(product);
+    let customer = await this.customerRepository.findByEmail(dto.email);
+
+    if (!customer) {
+
+      customer = await this.customerRepository.create({
+        id: '',
+        fullName: dto.fullName,
+        email: dto.email,
+        phone: dto.phone,
+        address: dto.address,
+        city: dto.city,
+        department: dto.department,
+        createdAt: new Date(),
+      });
+
+    }
 
     return {
-      message: 'Producto encontrado.',
+      message: 'Validación completada.',
       product,
+      customer,
     };
 
   }
