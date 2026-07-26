@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaProductRepository } from '../../infrastructure/repositories/prisma-product.repository';
+import { ProductRepository } from '../../domain/repositories/product.repository';
 import { ProductResponseDto } from '../dto/product-response.dto';
 
 @Injectable()
 export class GetProductsUseCase {
 
   constructor(
-    private readonly repository: PrismaProductRepository,
-  ) { }
+     private readonly repository: PrismaProductRepository,
+  ) {}
 
   async execute(): Promise<ProductResponseDto[]> {
 
@@ -21,7 +22,7 @@ export class GetProductsUseCase {
       brand: product.brand,
       category: product.category,
       description: product.description,
-      price: Number(product.price),
+      price: product.price,
       stock: product.stock,
       sizes: product.sizes,
       imageUrl: product.imageUrl,

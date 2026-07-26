@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ProductController } from './presentation/product/product.controller';
 import { GetProductsUseCase } from './application/usecases/get-products.usecase';
+import { GetProductByIdUseCase } from './application/usecases/get-product-by-id.usecase';
 import { PrismaProductRepository } from './infrastructure/repositories/prisma-product.repository';
 
 @Module({
   controllers: [ProductController],
-  providers: [GetProductsUseCase,PrismaProductRepository,]
+  providers: [
+    GetProductsUseCase,
+    GetProductByIdUseCase,
+    PrismaProductRepository,
+  ],
 })
-export class ProductsModule {}
+export class ProductsModule { }
