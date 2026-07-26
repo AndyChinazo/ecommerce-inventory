@@ -11,5 +11,8 @@ import { PrismaProductRepository } from './infrastructure/repositories/prisma-pr
     GetProductByIdUseCase,
     PrismaProductRepository,
   ],
+  exports: [
+    PrismaProductRepository,
+  ],
 })
-export class ProductsModule { }
+export class ProductsModule {}

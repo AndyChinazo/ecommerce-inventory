@@ -1,16 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+
 import { CreateTransactionDto } from '../dto/create-transaction.dto';
+
+import { PrismaProductRepository } from '../../../products/infrastructure/repositories/prisma-product.repository';
 
 @Injectable()
 export class CreateTransactionUseCase {
 
+  constructor(
+    private readonly productRepository: PrismaProductRepository,
+  ) {}
+
   async execute(dto: CreateTransactionDto) {
 
-    console.log('Nueva transacción recibida:', dto);
+    const product = await this.productRepository.findById(dto.productId);
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    if (product.stock <= 0) {
+      throw new BadRequestException('Producto sin stock');
+    }
+
+    console.log(product);
 
     return {
-      message: 'Transacción recibida correctamente.',
-      data: dto,
+      message: 'Producto encontrado.',
+      product,
     };
 
   }
