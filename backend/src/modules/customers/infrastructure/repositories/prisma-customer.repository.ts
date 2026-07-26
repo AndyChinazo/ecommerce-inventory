@@ -12,7 +12,27 @@ export class PrismaCustomerRepository implements CustomerRepository {
   ) { }
 
   async create(customer: Customer): Promise<Customer> {
-    throw new Error('Method not implemented.');
+    const createdCustomer = await this.prisma.customer.create({
+      data: {
+        fullName: customer.fullName,
+        email: customer.email,
+        phone: customer.phone,
+        address: customer.address,
+        city: customer.city,
+        department: customer.department,
+      },
+    });
+
+    return {
+      id: createdCustomer.id,
+      fullName: createdCustomer.fullName,
+      email: createdCustomer.email,
+      phone: createdCustomer.phone,
+      address: createdCustomer.address,
+      city: createdCustomer.city,
+      department: createdCustomer.department,
+      createdAt: createdCustomer.createdAt,
+    };
   }
 
   async findById(id: string): Promise<Customer | null> {
