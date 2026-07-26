@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { ProductsModule } from './modules/products/products.module';
 import { TransactionModule } from './modules/transactions/transaction.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 
 @Module({
@@ -15,8 +17,12 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     ProductsModule,
     TransactionModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), "images"),
+      serveRoot: '/images',
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
