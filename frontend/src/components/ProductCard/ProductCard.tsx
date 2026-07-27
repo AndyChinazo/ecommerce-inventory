@@ -29,7 +29,7 @@ function ProductCard({ product, onBuy }: Props) {
             <div className="bg-gray-100">
 
                 <img
-                    src={`VITE_API_URL${product.imageUrl}`}
+                    src={`${import.meta.env.VITE_API_URL}${product.imageUrl}`}
                     alt={product.name}
                     className="
                         w-full
