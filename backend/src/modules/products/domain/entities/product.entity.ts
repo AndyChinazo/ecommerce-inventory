@@ -1,3 +1,5 @@
+import { Category } from '@prisma/client';
+
 export class Product {
 
   id!: string;
@@ -8,7 +10,7 @@ export class Product {
 
   brand!: string;
 
-  category!: string;
+  category!: Category;
 
   description!: string;
 

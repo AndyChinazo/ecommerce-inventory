@@ -7,6 +7,7 @@ import { TransactionModule } from './modules/transactions/transaction.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { PaymentModule } from './modules/payments/payment.module';
 
 
 @Module({
@@ -17,6 +18,7 @@ import { join } from 'path';
     PrismaModule,
     ProductsModule,
     TransactionModule,
+    PaymentModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), "images"),
       serveRoot: '/images',

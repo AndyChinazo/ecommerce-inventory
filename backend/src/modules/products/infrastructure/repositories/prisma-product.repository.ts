@@ -8,7 +8,7 @@ export class PrismaProductRepository implements ProductRepository {
 
   constructor(
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   async findAll(): Promise<Product[]> {
 
@@ -56,6 +56,40 @@ export class PrismaProductRepository implements ProductRepository {
       stock: product.stock,
       sizes: product.sizes,
       imageUrl: product.imageUrl,
+    };
+
+  }
+
+  async update(product: Product): Promise<Product> {
+
+    const updated = await this.prisma.product.update({
+      where: {
+        id: product.id,
+      },
+      data: {
+        inventoryCode: product.inventoryCode,
+        name: product.name,
+        brand: product.brand,
+        category: product.category,
+        description: product.description,
+        price: product.price,
+        stock: product.stock,
+        sizes: product.sizes,
+        imageUrl: product.imageUrl,
+      },
+    });
+
+    return {
+      id: updated.id,
+      inventoryCode: updated.inventoryCode,
+      name: updated.name,
+      brand: updated.brand,
+      category: updated.category,
+      description: updated.description,
+      price: Number(updated.price),
+      stock: updated.stock,
+      sizes: updated.sizes,
+      imageUrl: updated.imageUrl,
     };
 
   }

@@ -15,10 +15,32 @@ export interface CreateTransactionRequest {
 
 export async function createTransaction(
   data: CreateTransactionRequest
-): Promise<Transaction> {
+): Promise<CreateTransactionResponse> {
 
-  const response = await api.post<Transaction>("/transactions",data);
+  const response = await api.post<CreateTransactionResponse>("/transactions",data);
 
   return response.data;
+
+}
+
+export interface CreateTransactionResponse {
+
+    transaction: Transaction;
+
+    wompi: {
+
+        publicKey: string;
+
+        currency: string;
+
+        amountInCents: number;
+
+        reference: string;
+
+        acceptanceToken: string;
+
+        integritySignature: string;
+
+    };
 
 }

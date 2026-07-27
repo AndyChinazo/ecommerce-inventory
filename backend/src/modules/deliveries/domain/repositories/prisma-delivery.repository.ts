@@ -12,13 +12,53 @@ export class PrismaDeliveryRepository implements DeliveryRepository {
   ) {}
 
   async create(delivery: Delivery): Promise<Delivery> {
-    throw new Error('Method not implemented.');
+
+    const created = await this.prisma.delivery.create({
+      data: {
+        transactionId: delivery.transactionId,
+        customerId: delivery.customerId,
+        address: delivery.address,
+        status: delivery.status,
+        estimatedDate: delivery.estimatedDate,
+      },
+    });
+
+    return {
+      id: created.id,
+      transactionId: created.transactionId,
+      customerId: created.customerId,
+      address: created.address,
+      status: created.status,
+      estimatedDate: created.estimatedDate,
+      createdAt: created.createdAt,
+    };
+
   }
 
   async findByTransactionId(
     transactionId: string,
   ): Promise<Delivery | null> {
-    throw new Error('Method not implemented.');
+
+    const delivery = await this.prisma.delivery.findUnique({
+      where: {
+        transactionId,
+      },
+    });
+
+    if (!delivery) {
+      return null;
+    }
+
+    return {
+      id: delivery.id,
+      transactionId: delivery.transactionId,
+      customerId: delivery.customerId,
+      address: delivery.address,
+      status: delivery.status,
+      estimatedDate: delivery.estimatedDate,
+      createdAt: delivery.createdAt,
+    };
+
   }
 
 }

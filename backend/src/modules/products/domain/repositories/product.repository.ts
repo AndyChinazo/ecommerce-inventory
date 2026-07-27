@@ -6,4 +6,6 @@ export interface ProductRepository {
 
   findById(id: string): Promise<Product | null>;
 
+  update(product: Product): Promise<Product>;
+
 }

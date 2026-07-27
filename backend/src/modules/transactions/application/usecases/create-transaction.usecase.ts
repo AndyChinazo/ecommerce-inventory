@@ -5,6 +5,8 @@ import { CreateTransactionDto } from '../dto/create-transaction.dto';
 import { PrismaProductRepository } from '../../../products/infrastructure/repositories/prisma-product.repository';
 import { PrismaCustomerRepository } from '../../../customers/infrastructure/repositories/prisma-customer.repository';
 import { PrismaTransactionRepository } from '../../infrastructure/repositories/prisma-transaction.repository';
+import * as crypto from 'crypto';
+import { WompiService } from '../../infrastructure/services/wompi.service';
 
 @Injectable()
 export class CreateTransactionUseCase {
@@ -13,6 +15,7 @@ export class CreateTransactionUseCase {
     private readonly productRepository: PrismaProductRepository,
     private readonly customerRepository: PrismaCustomerRepository,
     private readonly transactionRepository: PrismaTransactionRepository,
+    private readonly wompiService: WompiService,
   ) { }
 
   async execute(dto: CreateTransactionDto) {
@@ -67,8 +70,16 @@ export class CreateTransactionUseCase {
       updatedAt: new Date(),
     });
 
-    return transaction;
+    const wompi = await this.wompiService.getCheckoutData(
+      transaction.transactionNumber,
+      transaction.total,
+    );
 
+    return {
+      transaction,
+      wompi,
+    };
+   
   }
 
 }

@@ -44,17 +44,98 @@ export class PrismaTransactionRepository implements TransactionRepository {
   }
 
   async findById(id: string): Promise<Transaction | null> {
-    throw new Error('Method not implemented.');
+
+    const transaction = await this.prisma.transaction.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!transaction) {
+      return null;
+    }
+
+    return {
+      id: transaction.id,
+      transactionNumber: transaction.transactionNumber,
+      wompiTransactionId: transaction.wompiTransactionId ?? undefined,
+      status: transaction.status,
+      subtotal: Number(transaction.subtotal),
+      baseFee: Number(transaction.baseFee),
+      deliveryFee: Number(transaction.deliveryFee),
+      total: Number(transaction.total),
+      customerId: transaction.customerId,
+      productId: transaction.productId,
+      createdAt: transaction.createdAt,
+      updatedAt: transaction.updatedAt,
+    };
+
   }
 
   async findByTransactionNumber(
     transactionNumber: string,
   ): Promise<Transaction | null> {
-    throw new Error('Method not implemented.');
+
+    const transaction = await this.prisma.transaction.findUnique({
+      where: {
+        transactionNumber,
+      },
+    });
+
+    if (!transaction) {
+      return null;
+    }
+
+    return {
+      id: transaction.id,
+      transactionNumber: transaction.transactionNumber,
+      wompiTransactionId: transaction.wompiTransactionId ?? undefined,
+      status: transaction.status,
+      subtotal: Number(transaction.subtotal),
+      baseFee: Number(transaction.baseFee),
+      deliveryFee: Number(transaction.deliveryFee),
+      total: Number(transaction.total),
+      customerId: transaction.customerId,
+      productId: transaction.productId,
+      createdAt: transaction.createdAt,
+      updatedAt: transaction.updatedAt,
+    };
+
   }
 
   async update(transaction: Transaction): Promise<Transaction> {
-    throw new Error('Method not implemented.');
+
+    const updated = await this.prisma.transaction.update({
+      where: {
+        id: transaction.id,
+      },
+      data: {
+        wompiTransactionId: transaction.wompiTransactionId,
+        status: transaction.status as any,
+        subtotal: transaction.subtotal,
+        baseFee: transaction.baseFee,
+        deliveryFee: transaction.deliveryFee,
+        total: transaction.total,
+        customerId: transaction.customerId,
+        productId: transaction.productId,
+      },
+    });
+
+    return {
+      id: updated.id,
+      transactionNumber: updated.transactionNumber,
+      wompiTransactionId: updated.wompiTransactionId ?? undefined,
+      status: updated.status,
+      subtotal: Number(updated.subtotal),
+      baseFee: Number(updated.baseFee),
+      deliveryFee: Number(updated.deliveryFee),
+      total: Number(updated.total),
+      customerId: updated.customerId,
+      productId: updated.productId,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
+
   }
 
 }

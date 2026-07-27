@@ -1,3 +1,5 @@
+import { DeliveryStatus } from '@prisma/client';
+
 export class Delivery {
 
   id!: string;
@@ -8,7 +10,7 @@ export class Delivery {
 
   address!: string;
 
-  status!: string;
+  status!: DeliveryStatus;
 
   estimatedDate!: Date;
 
