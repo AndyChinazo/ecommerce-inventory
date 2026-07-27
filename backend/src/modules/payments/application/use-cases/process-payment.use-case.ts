@@ -42,10 +42,12 @@ export class ProcessPaymentUseCase {
         if (!customer) {
             throw new NotFoundException('Cliente no encontrado');
         }
+        console.log("1. Transacción encontrada");
         const checkout = await this.wompiService.getCheckoutData(
             transaction.transactionNumber,
             transaction.total,
         );
+        console.log("2. Checkout OK", checkout);
         const cardToken = await this.wompiService.tokenizeCard(
             dto.cardNumber,
             dto.cvc,
@@ -53,11 +55,13 @@ export class ProcessPaymentUseCase {
             dto.expYear,
             dto.cardHolder,
         );
+        console.log("3. Card Token OK", cardToken);
         const paymentSource = await this.wompiService.createPaymentSource(
             cardToken.id,
             customer.email,
             checkout.acceptanceToken,
         );
+        console.log("4. Payment Source OK", paymentSource);
         const wompiTransaction = await this.wompiService.createTransaction(
             checkout.acceptanceToken,
             checkout.amountInCents,
@@ -68,6 +72,7 @@ export class ProcessPaymentUseCase {
             paymentSource.id,
             dto.installments,
         );
+        console.log("5. Wompi Transaction OK", wompiTransaction);
 
         transaction.wompiTransactionId = wompiTransaction.id;
         transaction.status = wompiTransaction.status;

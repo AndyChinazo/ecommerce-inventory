@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { createTransaction } from "../../services/transaction.service";
+import { processPayment } from "../../services/payment.service";
 
 import type { CheckoutForm } from "../../types/checkout";
 
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
+
 
 import {
     closeModal,
@@ -25,6 +27,8 @@ function CheckoutModal() {
     );
 
     const [loading, setLoading] = useState(false);
+    const [paymentLoading, setPaymentLoading] = useState(false);
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
 
     const [error, setError] = useState("");
 
@@ -50,12 +54,11 @@ function CheckoutModal() {
         try {
 
             setLoading(true);
-
             setError("");
 
             dispatch(setCustomer(data));
 
-            const response = await createTransaction({
+            const transactionResponse = await createTransaction({
 
                 productId: product.id,
 
@@ -73,52 +76,86 @@ function CheckoutModal() {
 
             });
 
-            dispatch(setTransaction(response.transaction));
+            dispatch(setTransaction(transactionResponse.transaction));
 
-            console.log("Transacción creada", response.transaction);
+            setLoading(false);
 
-            /*
-              Aquí en el siguiente bloque
-              conectaremos Wompi.
-            */
+            setPaymentLoading(true);
 
-            const checkout = new window.WidgetCheckout({
+            const payment = await processPayment({
 
-                currency: response.wompi.currency,
+                transactionId: transactionResponse.transaction.id,
 
-                amountInCents: response.wompi.amountInCents,
+                cardNumber: data.cardNumber,
 
-                reference: response.wompi.reference,
+                cvc: data.cvc,
 
-                publicKey: response.wompi.publicKey,
+                expMonth: data.expMonth,
 
-                signature: {
+                expYear: data.expYear,
 
-                    integrity: response.wompi.integritySignature,
+                cardHolder: data.cardHolder,
 
-                },
-
-                acceptanceToken: response.wompi.acceptanceToken,
+                installments: Number(data.installments),
 
             });
-            checkout.open((result: any) => {
 
-                console.log(result);
-                //reset();
-                //dispatch(closeModal());
+            setPaymentLoading(false);
+            setError("");
 
-            });
+            switch (payment.status) {
+
+                case "APPROVED":
+
+                    setPaymentSuccess(true);
+
+                    setTimeout(() => {
+
+                        reset();
+
+                        dispatch(closeModal());
+
+                    }, 1800);
+
+                    break;
+
+                case "DECLINED":
+
+                    setError("La entidad financiera rechazó el pago.");
+                    break;
+
+                case "VOIDED":
+
+                    setError("La transacción fue cancelada.");
+                    break;
+
+                case "ERROR":
+
+                    setError("Ocurrió un error procesando el pago.");
+                    break;
+
+                case "PENDING":
+
+                    setError("El pago aún se encuentra pendiente.");
+                    break;
+
+                default:
+
+                    setError(`Estado del pago: ${payment.status}`);
+                    break;
+
+            }
 
 
         } catch (error) {
 
             console.error(error);
 
-            setError("No fue posible crear la transacción.");
-
-        } finally {
-
             setLoading(false);
+
+            setPaymentLoading(false);
+
+            setError("No fue posible procesar el pago.");
 
         }
 
@@ -158,6 +195,17 @@ function CheckoutModal() {
                             <div className="mt-5 rounded-lg bg-red-100 text-red-700 p-4">
 
                                 {error}
+
+                            </div>
+
+                        )
+                    }
+                    {
+                        paymentSuccess && (
+
+                            <div className="mt-5 rounded-lg bg-green-100 text-green-700 p-4">
+
+                                ✅ Pago aprobado correctamente.
 
                             </div>
 
@@ -366,6 +414,162 @@ function CheckoutModal() {
 
                                 </div>
                             </div>
+                            <div>
+
+                                <label className="font-medium">
+
+                                    Número de tarjeta
+
+                                </label>
+
+                                <input
+                                    {...register("cardNumber", {
+                                        required: "Ingrese el número de la tarjeta",
+                                        minLength: {
+                                            value: 13,
+                                            message: "Número de tarjeta inválido",
+                                        },
+                                    })}
+                                    placeholder="4242 4242 4242 4242"
+                                    className="w-full mt-2 border rounded-lg p-3"
+                                />
+
+                                <p className="text-red-500 text-sm mt-1">
+
+                                    {errors.cardNumber?.message}
+
+                                </p>
+
+                            </div>
+                            <div>
+
+                                <label className="font-medium">
+
+                                    Titular de la tarjeta
+
+                                </label>
+
+                                <input
+                                    {...register("cardHolder", {
+                                        required: "Ingrese el titular",
+                                    })}
+                                    className="w-full mt-2 border rounded-lg p-3"
+                                />
+
+                                <p className="text-red-500 text-sm mt-1">
+
+                                    {errors.cardHolder?.message}
+
+                                </p>
+
+                            </div>
+                            <div className="grid grid-cols-3 gap-4">
+
+                                <div>
+
+                                    <label className="font-medium">
+
+                                        Mes
+
+                                    </label>
+
+                                    <input
+                                        {...register("expMonth", {
+                                            required: "Mes",
+                                        })}
+                                        placeholder="MM"
+                                        className="w-full mt-2 border rounded-lg p-3"
+                                    />
+
+                                    <p className="text-red-500 text-sm">
+
+                                        {errors.expMonth?.message}
+
+                                    </p>
+
+                                </div>
+
+                                <div>
+
+                                    <label className="font-medium">
+
+                                        Año
+
+                                    </label>
+
+                                    <input
+                                        {...register("expYear", {
+                                            required: "Año",
+                                        })}
+                                        placeholder="YY"
+                                        className="w-full mt-2 border rounded-lg p-3"
+                                    />
+
+                                    <p className="text-red-500 text-sm">
+
+                                        {errors.expYear?.message}
+
+                                    </p>
+
+                                </div>
+
+                                <div>
+
+                                    <label className="font-medium">
+
+                                        CVC
+
+                                    </label>
+
+                                    <input
+                                        {...register("cvc", {
+                                            required: "CVC",
+                                        })}
+                                        placeholder="123"
+                                        className="w-full mt-2 border rounded-lg p-3"
+                                    />
+
+                                    <p className="text-red-500 text-sm">
+
+                                        {errors.cvc?.message}
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+                            <div>
+
+                                <label className="font-medium">
+
+                                    Cuotas
+
+                                </label>
+
+                                <select
+                                    {...register("installments", {
+                                        valueAsNumber: true,
+                                    })}
+                                    className="w-full mt-2 border rounded-lg p-3"
+                                >
+
+                                    {Array.from({ length: 12 }, (_, i) => (
+
+                                        <option
+                                            key={i + 1}
+                                            value={i + 1}
+                                        >
+
+                                            {i + 1}
+
+                                        </option>
+
+                                    ))}
+
+                                </select>
+
+                            </div>
+
 
                             <div className="mt-8 rounded-xl border bg-gray-50 p-5">
 
@@ -447,7 +651,7 @@ function CheckoutModal() {
 
                                     type="submit"
 
-                                    disabled={loading}
+                                    disabled={loading || paymentLoading}
 
                                     className="flex-1 rounded-xl bg-black text-white py-3 hover:bg-gray-800 disabled:opacity-50"
 
@@ -456,10 +660,10 @@ function CheckoutModal() {
                                     {
 
                                         loading
-
                                             ? "Creando transacción..."
-
-                                            : "Continuar al pago"
+                                            : paymentLoading
+                                                ? "Procesando pago..."
+                                                : "Pagar ahora"
 
                                     }
 
